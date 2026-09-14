@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071428" />
+  <title>Tech Affari Italia</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="assets/logo.png" alt="Tech Affari Italia" class="logo" />
+        <div>
+          <strong>Tech Affari Italia</strong>
+          <span>Offerte tech selezionate</span>
+        </div>
+      </div>
+      <button id="cartBtn" class="icon-btn" aria-label="Apri carrello">🛒 <span id="cartCount">0</span></button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">🔥 OFFERTE DEL GIORNO</span>
+          <h1>La tecnologia giusta, al prezzo giusto.</h1>
+          <p>Scopri gadget, accessori e prodotti smart selezionati per te.</p>
+          <button class="primary" data-scroll="#catalog">Scopri le offerte</button>
+        </div>
+      </section>
+
+      <section class="search-wrap">
+        <input id="searchInput" type="search" placeholder="Cerca un prodotto..." autocomplete="off" />
+      </section>
+
+      <section class="chips" aria-label="Categorie">
+        <button class="chip active" data-cat="Tutti">Tutti</button>
+        <button class="chip" data-cat="Wearable">Wearable</button>
+        <button class="chip" data-cat="Audio">Audio</button>
+        <button class="chip" data-cat="Accessori">Accessori</button>
+        <button class="chip" data-cat="Smart Home">Smart Home</button>
+      </section>
+
+      <section id="catalog" class="catalog-section">
+        <div class="section-title">
+          <div><span class="eyebrow">CATALOGO</span><h2>Prodotti in evidenza</h2></div>
+          <span id="productCount" class="muted"></span>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+      </section>
+
+      <section class="benefits">
+        <article><b>📦</b><strong>Spedizione</strong><span>Costi e tempi al checkout</span></article>
+        <article><b>🔒</b><strong>Acquisto sicuro</strong><span>Pagamenti da configurare</span></article>
+        <article><b>💬</b><strong>Supporto Telegram</strong><span>Contatto rapido con il negozio</span></article>
+      </section>
+    </main>
+
+    <footer>
+      <img src="assets/logo.png" alt="" />
+      <p><strong>Tech Affari Italia</strong><br><span>Demo Mini App · Catalogo e carrello funzionanti</span></p>
+      <small>Termini · Privacy · Resi — da completare prima della pubblicazione commerciale.</small>
+    </footer>
+  </div>
+
+  <div id="overlay" class="overlay hidden"></div>
+
+  <aside id="cartDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-head"><h2>Il tuo carrello</h2><button id="closeCart" class="icon-btn">✕</button></div>
+    <div id="cartItems" class="cart-items"></div>
+    <div class="cart-summary">
+      <div><span>Subtotale</span><strong id="subtotal">€0,00</strong></div>
+      <div><span>Spedizione</span><strong>da definire</strong></div>
+      <div class="total"><span>Totale prodotti</span><strong id="total">€0,00</strong></div>
+      <button id="checkoutBtn" class="primary wide">Procedi all’ordine</button>
+    </div>
+  </aside>
+
+  <div id="checkoutModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="drawer-head"><div><span class="eyebrow">CHECKOUT</span><h2>Completa l’ordine</h2></div><button id="closeCheckout" class="icon-btn">✕</button></div>
+      <form id="checkoutForm">
+        <div class="field-grid">
+          <label>Nome e cognome<input name="name" required autocomplete="name"></label>
+          <label>Telefono<input name="phone" required autocomplete="tel"></label>
+        </div>
+        <label>Email<input name="email" type="email" required autocomplete="email"></label>
+        <label>Indirizzo<input name="address" required autocomplete="street-address"></label>
+        <div class="field-grid">
+          <label>Città<input name="city" required autocomplete="address-level2"></label>
+          <label>CAP<input name="zip" required inputmode="numeric" autocomplete="postal-code"></label>
+        </div>
+        <label>Note ordine<textarea name="notes" rows="3" placeholder="Citofono, preferenze, note..."></textarea></label>
+        <div class="notice">Questa prima versione invia i dati dell’ordine al bot Telegram quando la Mini App è aperta da Telegram. Il pagamento online verrà collegato nel passaggio successivo.</div>
+        <button class="primary wide" type="submit">Conferma ordine</button>
+      </form>
+      <div id="orderSuccess" class="success hidden">
+        <div class="success-icon">✓</div>
+        <h2>Ordine preparato</h2>
+        <p id="successText"></p>
+        <button id="doneBtn" class="primary wide">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

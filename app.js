@@ -1,11 +1,14 @@
-
 const tg = window.Telegram?.WebApp;
+const API_URL = "https://tech-affari-italia-api.marconeri70.workers.dev/order";
+
 if (tg) {
   tg.ready();
   tg.expand();
   try {
-    if (tg.themeParams?.bg_color) document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color);
-  } catch(e){}
+    if (tg.themeParams?.bg_color) {
+      document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color);
+    }
+  } catch(e) {}
 }
 
 const products = [
@@ -26,7 +29,11 @@ const grid = $("#productGrid");
 const fmt = n => new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n);
 
 function renderProducts(){
-  const list = products.filter(p => (activeCat==="Tutti" || p.cat===activeCat) && p.name.toLowerCase().includes(query.toLowerCase()));
+  const list = products.filter(p =>
+    (activeCat === "Tutti" || p.cat === activeCat) &&
+    p.name.toLowerCase().includes(query.toLowerCase())
+  );
+
   $("#productCount").textContent = `${list.length} prodotti`;
   grid.innerHTML = list.map(p => `
     <article class="product-card">
@@ -43,16 +50,23 @@ function saveCart(){
   localStorage.setItem("tai_cart", JSON.stringify(cart));
   renderCart();
 }
-function cartEntries(){ return Object.entries(cart).map(([id,qty])=>({p:products.find(x=>x.id===+id),qty})).filter(x=>x.p); }
+
+function cartEntries(){
+  return Object.entries(cart)
+    .map(([id,qty]) => ({p:products.find(x => x.id === +id),qty}))
+    .filter(x => x.p);
+}
+
 function renderCart(){
   const items = cartEntries();
-  $("#cartCount").textContent = items.reduce((s,x)=>s+x.qty,0);
-  const subtotal = items.reduce((s,x)=>s+x.p.price*x.qty,0);
+  $("#cartCount").textContent = items.reduce((s,x) => s + x.qty,0);
+  const subtotal = items.reduce((s,x) => s + x.p.price * x.qty,0);
   $("#subtotal").textContent = fmt(subtotal);
   $("#total").textContent = fmt(subtotal);
   $("#checkoutBtn").disabled = !items.length;
   $("#checkoutBtn").style.opacity = items.length ? "1" : ".45";
-  $("#cartItems").innerHTML = items.length ? items.map(({p,qty})=>`
+
+  $("#cartItems").innerHTML = items.length ? items.map(({p,qty}) => `
     <div class="cart-item">
       <img src="${p.img}" alt="">
       <div>
@@ -62,64 +76,161 @@ function renderCart(){
       </div>
     </div>`).join("") : `<div class="empty"><div style="font-size:42px">🛒</div><h3>Il carrello è vuoto</h3><p>Aggiungi qualche prodotto dal catalogo.</p></div>`;
 }
+
 function openCart(){
-  $("#overlay").classList.remove("hidden"); $("#cartDrawer").classList.add("open"); $("#cartDrawer").setAttribute("aria-hidden","false");
+  $("#overlay").classList.remove("hidden");
+  $("#cartDrawer").classList.add("open");
+  $("#cartDrawer").setAttribute("aria-hidden","false");
 }
+
 function closeCart(){
-  $("#overlay").classList.add("hidden"); $("#cartDrawer").classList.remove("open"); $("#cartDrawer").setAttribute("aria-hidden","true");
+  $("#overlay").classList.add("hidden");
+  $("#cartDrawer").classList.remove("open");
+  $("#cartDrawer").setAttribute("aria-hidden","true");
 }
+
 function showInfo(id){
-  const p=products.find(x=>x.id===id); if(!p)return;
+  const p = products.find(x => x.id === id);
+  if(!p) return;
   alert(`${p.name}\n\n${p.desc}\n\nPrezzo: ${fmt(p.price)}\n\nProdotto dimostrativo: caratteristiche e disponibilità andranno sostituite con quelle reali del fornitore.`);
 }
 
-document.addEventListener("click", e=>{
-  const add=e.target.closest("[data-add]"); if(add){ const id=+add.dataset.add; cart[id]=(cart[id]||0)+1; saveCart(); tg?.HapticFeedback?.impactOccurred("light"); }
-  const inc=e.target.closest("[data-inc]"); if(inc){ const id=+inc.dataset.inc; cart[id]=(cart[id]||0)+1; saveCart(); }
-  const dec=e.target.closest("[data-dec]"); if(dec){ const id=+dec.dataset.dec; cart[id]=Math.max(0,(cart[id]||0)-1); if(!cart[id])delete cart[id]; saveCart(); }
-  const rem=e.target.closest("[data-remove]"); if(rem){ delete cart[+rem.dataset.remove]; saveCart(); }
-  const info=e.target.closest("[data-info]"); if(info) showInfo(+info.dataset.info);
-  const scroll=e.target.closest("[data-scroll]"); if(scroll) document.querySelector(scroll.dataset.scroll)?.scrollIntoView({behavior:"smooth"});
+document.addEventListener("click", e => {
+  const add = e.target.closest("[data-add]");
+  if(add){
+    const id = +add.dataset.add;
+    cart[id] = (cart[id] || 0) + 1;
+    saveCart();
+    tg?.HapticFeedback?.impactOccurred("light");
+  }
+
+  const inc = e.target.closest("[data-inc]");
+  if(inc){
+    const id = +inc.dataset.inc;
+    cart[id] = (cart[id] || 0) + 1;
+    saveCart();
+  }
+
+  const dec = e.target.closest("[data-dec]");
+  if(dec){
+    const id = +dec.dataset.dec;
+    cart[id] = Math.max(0,(cart[id] || 0) - 1);
+    if(!cart[id]) delete cart[id];
+    saveCart();
+  }
+
+  const rem = e.target.closest("[data-remove]");
+  if(rem){
+    delete cart[+rem.dataset.remove];
+    saveCart();
+  }
+
+  const info = e.target.closest("[data-info]");
+  if(info) showInfo(+info.dataset.info);
+
+  const scroll = e.target.closest("[data-scroll]");
+  if(scroll) document.querySelector(scroll.dataset.scroll)?.scrollIntoView({behavior:"smooth"});
 });
 
 $("#cartBtn").addEventListener("click",openCart);
 $("#closeCart").addEventListener("click",closeCart);
 $("#overlay").addEventListener("click",closeCart);
-$("#searchInput").addEventListener("input",e=>{query=e.target.value;renderProducts();});
-document.querySelectorAll(".chip").forEach(btn=>btn.addEventListener("click",()=>{
-  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); activeCat=btn.dataset.cat; renderProducts();
+
+$("#searchInput").addEventListener("input", e => {
+  query = e.target.value;
+  renderProducts();
+});
+
+document.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => {
+  document.querySelectorAll(".chip").forEach(x => x.classList.remove("active"));
+  btn.classList.add("active");
+  activeCat = btn.dataset.cat;
+  renderProducts();
 }));
 
-$("#checkoutBtn").addEventListener("click",()=>{
-  if(!cartEntries().length)return;
-  closeCart(); $("#checkoutModal").classList.remove("hidden"); $("#checkoutForm").classList.remove("hidden"); $("#orderSuccess").classList.add("hidden");
+$("#checkoutBtn").addEventListener("click", () => {
+  if(!cartEntries().length) return;
+  closeCart();
+  $("#checkoutModal").classList.remove("hidden");
+  $("#checkoutForm").classList.remove("hidden");
+  $("#orderSuccess").classList.add("hidden");
 });
-$("#closeCheckout").addEventListener("click",()=>$("#checkoutModal").classList.add("hidden"));
-$("#doneBtn").addEventListener("click",()=>$("#checkoutModal").classList.add("hidden"));
 
-$("#checkoutForm").addEventListener("submit",e=>{
+$("#closeCheckout").addEventListener("click", () => $("#checkoutModal").classList.add("hidden"));
+$("#doneBtn").addEventListener("click", () => $("#checkoutModal").classList.add("hidden"));
+
+$("#checkoutForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const fd = Object.fromEntries(new FormData(e.currentTarget).entries());
+
+  const form = e.currentTarget;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+
+  if (!tg?.initData) {
+    alert("Per inviare l’ordine apri il negozio dal bot Telegram Tech Affari Italia.");
+    return;
+  }
+
+  const fd = Object.fromEntries(new FormData(form).entries());
   const items = cartEntries();
+
+  if (!items.length) {
+    alert("Il carrello è vuoto.");
+    return;
+  }
+
   const order = {
-    type:"new_order",
-    created_at:new Date().toISOString(),
-    customer:fd,
-    items:items.map(({p,qty})=>({id:p.id,name:p.name,qty,unit_price:p.price})),
-    total:items.reduce((s,x)=>s+x.p.price*x.qty,0),
-    telegram_user: tg?.initDataUnsafe?.user || null
+    initData: tg.initData,
+    customer: fd,
+    items: items.map(({p,qty}) => ({
+      id: p.id,
+      qty
+    }))
   };
-  let sent=false;
-  try{
-    if(tg?.sendData){ tg.sendData(JSON.stringify(order)); sent=true; }
-  }catch(err){ console.warn(err); }
-  $("#checkoutForm").classList.add("hidden");
-  $("#orderSuccess").classList.remove("hidden");
-  $("#successText").textContent = sent
-    ? "I dati dell’ordine sono stati inviati al bot. Nel prossimo passaggio collegheremo il bot alla gestione automatica degli ordini."
-    : "La demo funziona. Aprila da Telegram dopo averla collegata al bot per inviare l’ordine automaticamente.";
-  cart={}; saveCart();
-  tg?.HapticFeedback?.notificationOccurred("success");
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Invio ordine...";
+  submitBtn.style.opacity = ".7";
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(order)
+    });
+
+    let result = {};
+    try {
+      result = await response.json();
+    } catch (_) {}
+
+    if (!response.ok || !result.ok) {
+      throw new Error(result.error || "Impossibile inviare l’ordine");
+    }
+
+    $("#checkoutForm").classList.add("hidden");
+    $("#orderSuccess").classList.remove("hidden");
+    $("#successText").textContent =
+      `Ordine ${result.orderId} inviato correttamente. Ti contatteremo per conferma e spedizione.`;
+
+    cart = {};
+    saveCart();
+    form.reset();
+
+    tg?.HapticFeedback?.notificationOccurred("success");
+
+  } catch (err) {
+    console.error(err);
+    tg?.HapticFeedback?.notificationOccurred("error");
+    alert(`Ordine non inviato: ${err.message}. Riprova tra poco.`);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+    submitBtn.style.opacity = "1";
+  }
 });
 
-renderProducts(); renderCart();
+renderProducts();
+renderCart();

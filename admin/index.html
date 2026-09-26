@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071428">
+  <title>Admin · Tech Affari Italia</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <span class="eyebrow">TECH AFFARI ITALIA</span>
+        <h1>Admin catalogo</h1>
+        <p>Incolla un link affiliato Temu: il sistema prova a recuperare automaticamente titolo, immagine, descrizione e categoria.</p>
+      </div>
+      <a href="../" class="back">← Negozio</a>
+    </header>
+
+    <section class="panel">
+      <label>Chiave amministratore
+        <input id="adminKey" type="password" autocomplete="off" placeholder="ADMIN_KEY">
+      </label>
+      <small>La chiave non viene salvata nel sito pubblico. Puoi tenerla solo per questa sessione.</small>
+    </section>
+
+    <section class="panel import">
+      <h2>➕ Aggiungi da Temu</h2>
+      <label>Link affiliato
+        <input id="temuLink" type="url" placeholder="https://share.temu.com/..." inputmode="url">
+      </label>
+      <button id="importBtn" class="primary">Importa automaticamente</button>
+      <div id="importStatus" class="status"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Catalogo</h2>
+        <button id="refreshBtn" class="secondary">Aggiorna</button>
+      </div>
+      <div id="catalog" class="catalog"><div class="loading">Caricamento…</div></div>
+    </section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>

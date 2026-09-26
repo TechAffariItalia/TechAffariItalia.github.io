@@ -100,7 +100,7 @@ document.addEventListener("click",e=>{
   const info=e.target.closest("[data-info]");
   if(info){
     const p=products.find(x=>String(x.id)===String(info.dataset.info));
-    if(p) alert(`${p.title}\n\n${p.description || ""}\n\nLink affiliato: Tech Affari Italia può ricevere una commissione se acquisti tramite questo collegamento, senza costi aggiuntivi per te.`);
+    if(p) alert(`${p.title}\n\n${p.description || ""}`);
   }
   const scroll=e.target.closest("[data-scroll]");
   if(scroll) document.querySelector(scroll.dataset.scroll)?.scrollIntoView({behavior:"smooth"});

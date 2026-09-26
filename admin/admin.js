@@ -1,3 +1,55 @@
+
+// ---- PWA installazione Admin ----
+let deferredInstallPrompt = null;
+const installBtn = document.querySelector("#installAppBtn");
+const installHelp = document.querySelector("#installHelp");
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(err => {
+      console.warn("Service Worker non registrato:", err);
+    });
+  });
+}
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installBtn?.classList.remove("hidden");
+});
+
+installBtn?.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) {
+    alert("Se il pulsante di installazione non è disponibile, apri il menu ⋮ del browser e scegli “Installa app” oppure “Aggiungi a schermata Home”.");
+    return;
+  }
+
+  deferredInstallPrompt.prompt();
+  try {
+    await deferredInstallPrompt.userChoice;
+  } finally {
+    deferredInstallPrompt = null;
+    installBtn.classList.add("hidden");
+  }
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  installBtn?.classList.add("hidden");
+  if (installHelp) {
+    installHelp.innerHTML = "<strong>✅ App installata</strong><span>Tech Affari Italia Admin è ora disponibile dalla schermata Home.</span>";
+  }
+});
+
+const standalone =
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+
+if (standalone && installHelp) {
+  installHelp.innerHTML =
+    "<strong>📱 Tech Affari Italia Admin</strong><span>Stai usando la versione installata dell’app.</span>";
+}
+
 const API_BASE = "https://tech-affari-italia-api.marconeri70.workers.dev";
 const $ = s => document.querySelector(s);
 

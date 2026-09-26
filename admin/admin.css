@@ -64,3 +64,40 @@ label{display:block;font-size:12px;font-weight:800;color:#475467}input,textarea,
   .image-tools{grid-template-columns:1fr}
   .image-preview{width:100%;height:auto;aspect-ratio:1/1}
 }
+
+
+/* v6 — PWA installabile */
+.header-actions{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.install-app{
+  border:0;
+  background:var(--orange);
+  color:#fff;
+  font-weight:900;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  box-shadow:0 5px 14px rgba(255,106,0,.22);
+}
+.install-help{
+  background:linear-gradient(135deg,#071428,#0b2b55);
+  color:#fff;
+  border-radius:16px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  margin-bottom:14px;
+}
+.install-help strong{font-size:13px}
+.install-help span{font-size:11px;color:#dbe7f6;line-height:1.4}
+.hidden{display:none!important}
+
+@media(max-width:680px){
+  .header-actions{width:100%}
+  .install-app,.back{flex:1;text-align:center}
+}

@@ -6,6 +6,11 @@
   <meta name="theme-color" content="#071428">
   <title>Admin · Tech Affari Italia</title>
   <link rel="stylesheet" href="admin.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
   <main class="wrap">
@@ -15,8 +20,16 @@
         <h1>Admin catalogo</h1>
         <p>Incolla un link affiliato Temu: il sistema prova a recuperare automaticamente titolo, immagine, descrizione e categoria.</p>
       </div>
-      <a href="../" class="back">← Negozio</a>
+      <div class="header-actions">
+        <button id="installAppBtn" class="install-app hidden" type="button">⬇ Installa app</button>
+        <a href="../" class="back">← Negozio</a>
+      </div>
     </header>
+
+    <section id="installHelp" class="install-help">
+      <strong>📱 App Admin</strong>
+      <span>Puoi installare questa pagina sul telefono e aprirla come una normale app.</span>
+    </section>
 
     <section class="panel">
       <label>Chiave amministratore

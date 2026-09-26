@@ -1,236 +1,136 @@
 const tg = window.Telegram?.WebApp;
-const API_URL = "https://tech-affari-italia-api.marconeri70.workers.dev/order";
+if (tg) { tg.ready(); tg.expand(); }
 
-if (tg) {
-  tg.ready();
-  tg.expand();
-  try {
-    if (tg.themeParams?.bg_color) {
-      document.documentElement.style.setProperty('--bg', tg.themeParams.bg_color);
-    }
-  } catch(e) {}
-}
-
-const products = [
-  {id:1,name:"Smartwatch Active Pro",cat:"Wearable",price:39.90,old:59.90,img:"assets/smartwatch.svg",badge:"-33%",desc:"Display touch, notifiche, attività e autonomia estesa."},
-  {id:2,name:"Auricolari Wireless AirPods Style",cat:"Audio",price:24.90,old:34.90,img:"assets/earbuds.svg",badge:"OFFERTA",desc:"Custodia di ricarica, microfono e controlli touch."},
-  {id:3,name:"Caricatore Rapido USB-C 65W",cat:"Accessori",price:19.90,old:29.90,img:"assets/charger.svg",badge:"-10€",desc:"Ricarica rapida per smartphone, tablet e notebook compatibili."},
-  {id:4,name:"Mini Camera Wi‑Fi Smart",cat:"Smart Home",price:29.90,old:44.90,img:"assets/camera.svg",badge:"TOP",desc:"Controllo da smartphone, visione notturna e rilevamento movimento."},
-  {id:5,name:"Speaker Bluetooth Mini Bass",cat:"Audio",price:18.90,old:25.90,img:"assets/speaker.svg",badge:"-27%",desc:"Compatto, portatile, con suono pieno e connessione Bluetooth."},
-  {id:6,name:"Smart Tracker Bluetooth",cat:"Accessori",price:12.90,old:19.90,img:"assets/tracker.svg",badge:"NOVITÀ",desc:"Per chiavi, borse e oggetti da ritrovare rapidamente."}
-];
+const products = [{
+  id: 1,
+  name: "GUHUAVMI 2026 Smartwatch Sport",
+  cat: "Wearable",
+  img: "assets/smartwatch.svg",
+  badge: "TEMU AFFILIATE",
+  desc: "Smartwatch da uomo per sport e attività all’aperto. Prezzo, disponibilità e condizioni sono aggiornati direttamente su Temu.",
+  affiliateUrl: "https://share.temu.com/aNZyP0gZu8B"
+}];
 
 let activeCat = "Tutti";
 let query = "";
-let cart = JSON.parse(localStorage.getItem("tai_cart") || "{}");
-
 const $ = s => document.querySelector(s);
 const grid = $("#productGrid");
-const fmt = n => new Intl.NumberFormat("it-IT",{style:"currency",currency:"EUR"}).format(n);
 
-function renderProducts(){
+function openAffiliate(url) {
+  try {
+    if (tg?.openLink) return tg.openLink(url);
+  } catch(e) {}
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
+function prepareAffiliateUI() {
+  $("#cartBtn")?.classList.add("hidden");
+  $("#cartDrawer")?.classList.add("hidden");
+  $("#checkoutModal")?.classList.add("hidden");
+  $("#overlay")?.classList.add("hidden");
+
+  const brandSub = document.querySelector(".brand span");
+  if (brandSub) brandSub.textContent = "Offerte tech selezionate";
+
+  const heroTitle = document.querySelector(".hero h1");
+  if (heroTitle) heroTitle.textContent = "Scopri. Confronta. Acquista su Temu.";
+
+  const heroText = document.querySelector(".hero p");
+  if (heroText) heroText.textContent =
+    "Selezioniamo prodotti tecnologici interessanti e ti portiamo direttamente alla pagina ufficiale dell’offerta.";
+
+  const catalog = $("#catalog");
+  if (catalog && !document.querySelector(".affiliate-disclosure")) {
+    const note = document.createElement("div");
+    note.className = "affiliate-disclosure";
+    note.style.cssText =
+      "margin:0 0 14px;background:#fff8ef;border:1px solid #ffe0bd;border-radius:16px;padding:13px 14px;color:#6b4d2f;font-size:12px;line-height:1.45";
+    note.innerHTML =
+      "<strong style='display:block;color:#9b4d00;margin-bottom:4px'>ℹ️ Trasparenza</strong>" +
+      "Alcuni link sono affiliati: se acquisti tramite questi collegamenti, Tech Affari Italia può ricevere una commissione senza costi aggiuntivi per te.";
+    catalog.prepend(note);
+  }
+
+  const benefits = document.querySelector(".benefits");
+  if (benefits) {
+    benefits.innerHTML = `
+      <article><b>🛒</b><strong>Acquisto su Temu</strong><span>Il checkout avviene direttamente sulla piattaforma Temu.</span></article>
+      <article><b>📦</b><strong>Spedizione e resi</strong><span>Tempi, costi e condizioni sono quelli indicati da Temu.</span></article>
+      <article><b>🔎</b><strong>Prezzi aggiornati</strong><span>Prezzo e disponibilità vanno verificati sulla pagina Temu.</span></article>`;
+  }
+
+  const footerText = document.querySelector("footer p span");
+  if (footerText) footerText.textContent = "Vetrina affiliata di offerte tecnologiche.";
+
+  const footerSmall = document.querySelector("footer small");
+  if (footerSmall) footerSmall.textContent =
+    "Tech Affari Italia non gestisce direttamente pagamento, spedizione o resi dei prodotti acquistati tramite Temu.";
+}
+
+function renderProducts() {
   const list = products.filter(p =>
     (activeCat === "Tutti" || p.cat === activeCat) &&
     p.name.toLowerCase().includes(query.toLowerCase())
   );
 
-  $("#productCount").textContent = `${list.length} prodotti`;
-  grid.innerHTML = list.map(p => `
+  $("#productCount").textContent =
+    `${list.length} ${list.length === 1 ? "prodotto" : "prodotti"}`;
+
+  grid.innerHTML = list.length ? list.map(p => `
     <article class="product-card">
-      <div class="product-media"><img src="${p.img}" alt="${p.name}"><span class="badge">${p.badge}</span></div>
+      <div class="product-media">
+        <img src="${p.img}" alt="${p.name}">
+        <span class="badge">${p.badge}</span>
+      </div>
       <div class="product-body">
-        <small>${p.cat}</small><h3>${p.name}</h3>
-        <div class="price-row"><span class="price">${fmt(p.price)}</span><span class="old">${fmt(p.old)}</span></div>
-        <div class="card-actions"><button class="add-btn" data-add="${p.id}">Aggiungi</button><button class="info-btn" data-info="${p.id}">ⓘ</button></div>
+        <small>${p.cat}</small>
+        <h3>${p.name}</h3>
+        <p style="font-size:12px;line-height:1.4;color:#667085">${p.desc}</p>
+        <div style="font-size:13px;font-weight:800;margin-top:8px">Prezzo aggiornato su Temu</div>
+        <div class="card-actions">
+          <button class="add-btn" data-buy="${p.id}" style="background:#ff6a00">🛒 Acquista su Temu</button>
+          <button class="info-btn" data-info="${p.id}">ⓘ</button>
+        </div>
       </div>
-    </article>`).join("");
-}
-
-function saveCart(){
-  localStorage.setItem("tai_cart", JSON.stringify(cart));
-  renderCart();
-}
-
-function cartEntries(){
-  return Object.entries(cart)
-    .map(([id,qty]) => ({p:products.find(x => x.id === +id),qty}))
-    .filter(x => x.p);
-}
-
-function renderCart(){
-  const items = cartEntries();
-  $("#cartCount").textContent = items.reduce((s,x) => s + x.qty,0);
-  const subtotal = items.reduce((s,x) => s + x.p.price * x.qty,0);
-  $("#subtotal").textContent = fmt(subtotal);
-  $("#total").textContent = fmt(subtotal);
-  $("#checkoutBtn").disabled = !items.length;
-  $("#checkoutBtn").style.opacity = items.length ? "1" : ".45";
-
-  $("#cartItems").innerHTML = items.length ? items.map(({p,qty}) => `
-    <div class="cart-item">
-      <img src="${p.img}" alt="">
-      <div>
-        <h4>${p.name}</h4>
-        <div class="cart-line"><strong>${fmt(p.price)}</strong><button class="remove" data-remove="${p.id}">Rimuovi</button></div>
-        <div class="cart-line"><div class="qty"><button data-dec="${p.id}">−</button><b>${qty}</b><button data-inc="${p.id}">+</button></div><strong>${fmt(p.price*qty)}</strong></div>
-      </div>
-    </div>`).join("") : `<div class="empty"><div style="font-size:42px">🛒</div><h3>Il carrello è vuoto</h3><p>Aggiungi qualche prodotto dal catalogo.</p></div>`;
-}
-
-function openCart(){
-  $("#overlay").classList.remove("hidden");
-  $("#cartDrawer").classList.add("open");
-  $("#cartDrawer").setAttribute("aria-hidden","false");
-}
-
-function closeCart(){
-  $("#overlay").classList.add("hidden");
-  $("#cartDrawer").classList.remove("open");
-  $("#cartDrawer").setAttribute("aria-hidden","true");
-}
-
-function showInfo(id){
-  const p = products.find(x => x.id === id);
-  if(!p) return;
-  alert(`${p.name}\n\n${p.desc}\n\nPrezzo: ${fmt(p.price)}\n\nProdotto dimostrativo: caratteristiche e disponibilità andranno sostituite con quelle reali del fornitore.`);
+    </article>`).join("") :
+    `<div class="empty"><h3>Nessun prodotto trovato</h3></div>`;
 }
 
 document.addEventListener("click", e => {
-  const add = e.target.closest("[data-add]");
-  if(add){
-    const id = +add.dataset.add;
-    cart[id] = (cart[id] || 0) + 1;
-    saveCart();
-    tg?.HapticFeedback?.impactOccurred("light");
-  }
-
-  const inc = e.target.closest("[data-inc]");
-  if(inc){
-    const id = +inc.dataset.inc;
-    cart[id] = (cart[id] || 0) + 1;
-    saveCart();
-  }
-
-  const dec = e.target.closest("[data-dec]");
-  if(dec){
-    const id = +dec.dataset.dec;
-    cart[id] = Math.max(0,(cart[id] || 0) - 1);
-    if(!cart[id]) delete cart[id];
-    saveCart();
-  }
-
-  const rem = e.target.closest("[data-remove]");
-  if(rem){
-    delete cart[+rem.dataset.remove];
-    saveCart();
+  const buy = e.target.closest("[data-buy]");
+  if (buy) {
+    const p = products.find(x => x.id === +buy.dataset.buy);
+    if (p) {
+      tg?.HapticFeedback?.impactOccurred("light");
+      openAffiliate(p.affiliateUrl);
+    }
   }
 
   const info = e.target.closest("[data-info]");
-  if(info) showInfo(+info.dataset.info);
+  if (info) {
+    const p = products.find(x => x.id === +info.dataset.info);
+    if (p) alert(
+      `${p.name}\n\n${p.desc}\n\nLink affiliato: Tech Affari Italia può ricevere una commissione se acquisti tramite questo collegamento, senza costi aggiuntivi per te.`
+    );
+  }
 
   const scroll = e.target.closest("[data-scroll]");
-  if(scroll) document.querySelector(scroll.dataset.scroll)?.scrollIntoView({behavior:"smooth"});
+  if (scroll) document.querySelector(scroll.dataset.scroll)?.scrollIntoView({behavior:"smooth"});
 });
 
-$("#cartBtn").addEventListener("click",openCart);
-$("#closeCart").addEventListener("click",closeCart);
-$("#overlay").addEventListener("click",closeCart);
-
-$("#searchInput").addEventListener("input", e => {
-  query = e.target.value;
+$("#searchInput")?.addEventListener("input", e => {
+  query = e.target.value.trim();
   renderProducts();
 });
 
-document.querySelectorAll(".chip").forEach(btn => btn.addEventListener("click", () => {
-  document.querySelectorAll(".chip").forEach(x => x.classList.remove("active"));
-  btn.classList.add("active");
-  activeCat = btn.dataset.cat;
-  renderProducts();
-}));
-
-$("#checkoutBtn").addEventListener("click", () => {
-  if(!cartEntries().length) return;
-  closeCart();
-  $("#checkoutModal").classList.remove("hidden");
-  $("#checkoutForm").classList.remove("hidden");
-  $("#orderSuccess").classList.add("hidden");
+document.querySelectorAll(".chip").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+    activeCat = btn.dataset.cat;
+    renderProducts();
+  });
 });
 
-$("#closeCheckout").addEventListener("click", () => $("#checkoutModal").classList.add("hidden"));
-$("#doneBtn").addEventListener("click", () => $("#checkoutModal").classList.add("hidden"));
-
-$("#checkoutForm").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const form = e.currentTarget;
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-
-  if (!tg?.initData) {
-    alert("Per inviare l’ordine apri il negozio dal bot Telegram Tech Affari Italia.");
-    return;
-  }
-
-  const fd = Object.fromEntries(new FormData(form).entries());
-  const items = cartEntries();
-
-  if (!items.length) {
-    alert("Il carrello è vuoto.");
-    return;
-  }
-
-  const order = {
-    initData: tg.initData,
-    customer: fd,
-    items: items.map(({p,qty}) => ({
-      id: p.id,
-      qty
-    }))
-  };
-
-  submitBtn.disabled = true;
-  submitBtn.textContent = "Invio ordine...";
-  submitBtn.style.opacity = ".7";
-
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(order)
-    });
-
-    let result = {};
-    try {
-      result = await response.json();
-    } catch (_) {}
-
-    if (!response.ok || !result.ok) {
-      throw new Error(result.error || "Impossibile inviare l’ordine");
-    }
-
-    $("#checkoutForm").classList.add("hidden");
-    $("#orderSuccess").classList.remove("hidden");
-    $("#successText").textContent =
-      `Ordine ${result.orderId} inviato correttamente. Ti contatteremo per conferma e spedizione.`;
-
-    cart = {};
-    saveCart();
-    form.reset();
-
-    tg?.HapticFeedback?.notificationOccurred("success");
-
-  } catch (err) {
-    console.error(err);
-    tg?.HapticFeedback?.notificationOccurred("error");
-    alert(`Ordine non inviato: ${err.message}. Riprova tra poco.`);
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
-    submitBtn.style.opacity = "1";
-  }
-});
-
+prepareAffiliateUI();
 renderProducts();
-renderCart();

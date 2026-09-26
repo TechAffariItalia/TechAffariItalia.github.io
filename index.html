@@ -18,30 +18,29 @@
           <span>Offerte tech selezionate</span>
         </div>
       </div>
-      <button id="cartBtn" class="icon-btn" aria-label="Apri carrello">🛒 <span id="cartCount">0</span></button>
+      <span class="affiliate-pill">AFFILIATE</span>
     </header>
 
     <main>
       <section class="hero">
         <div class="hero-copy">
-          <span class="eyebrow">🔥 OFFERTE DEL GIORNO</span>
-          <h1>La tecnologia giusta, al prezzo giusto.</h1>
-          <p>Scopri gadget, accessori e prodotti smart selezionati per te.</p>
+          <span class="eyebrow">🔥 OFFERTE TECH</span>
+          <h1>Scopri. Confronta. Acquista su Temu.</h1>
+          <p>Selezioniamo prodotti tecnologici interessanti e ti portiamo direttamente alla pagina ufficiale dell’offerta.</p>
           <button class="primary" data-scroll="#catalog">Scopri le offerte</button>
         </div>
+      </section>
+
+      <section class="affiliate-note">
+        <strong>ℹ️ Trasparenza</strong>
+        <span>Alcuni link sono affiliati: se acquisti tramite questi collegamenti, Tech Affari Italia può ricevere una commissione senza costi aggiuntivi per te.</span>
       </section>
 
       <section class="search-wrap">
         <input id="searchInput" type="search" placeholder="Cerca un prodotto..." autocomplete="off" />
       </section>
 
-      <section class="chips" aria-label="Categorie">
-        <button class="chip active" data-cat="Tutti">Tutti</button>
-        <button class="chip" data-cat="Wearable">Wearable</button>
-        <button class="chip" data-cat="Audio">Audio</button>
-        <button class="chip" data-cat="Accessori">Accessori</button>
-        <button class="chip" data-cat="Smart Home">Smart Home</button>
-      </section>
+      <section id="categoryChips" class="chips" aria-label="Categorie"></section>
 
       <section id="catalog" class="catalog-section">
         <div class="section-title">
@@ -51,58 +50,18 @@
         <div id="productGrid" class="product-grid"></div>
       </section>
 
-      <section class="benefits">
-        <article><b>📦</b><strong>Spedizione</strong><span>Costi e tempi al checkout</span></article>
-        <article><b>🔒</b><strong>Acquisto sicuro</strong><span>Pagamenti da configurare</span></article>
-        <article><b>💬</b><strong>Supporto Telegram</strong><span>Contatto rapido con il negozio</span></article>
+      <section class="compact-trust" aria-label="Informazioni acquisto">
+        <div><b>🛒</b><span><strong>Acquisto su Temu</strong><small>Checkout diretto su Temu</small></span></div>
+        <div><b>📦</b><span><strong>Spedizione e resi</strong><small>Gestiti secondo le condizioni Temu</small></span></div>
+        <div><b>🔎</b><span><strong>Prezzi aggiornati</strong><small>Verifica finale sulla pagina Temu</small></span></div>
       </section>
     </main>
 
     <footer>
       <img src="assets/logo.png" alt="" />
-      <p><strong>Tech Affari Italia</strong><br><span>Demo Mini App · Catalogo e carrello funzionanti</span></p>
-      <small>Termini · Privacy · Resi — da completare prima della pubblicazione commerciale.</small>
+      <p><strong>Tech Affari Italia</strong><br><span>Vetrina affiliata di offerte tecnologiche.</span></p>
+      <small>Tech Affari Italia non gestisce direttamente pagamento, spedizione o resi dei prodotti acquistati tramite Temu.</small>
     </footer>
-  </div>
-
-  <div id="overlay" class="overlay hidden"></div>
-
-  <aside id="cartDrawer" class="drawer" aria-hidden="true">
-    <div class="drawer-head"><h2>Il tuo carrello</h2><button id="closeCart" class="icon-btn">✕</button></div>
-    <div id="cartItems" class="cart-items"></div>
-    <div class="cart-summary">
-      <div><span>Subtotale</span><strong id="subtotal">€0,00</strong></div>
-      <div><span>Spedizione</span><strong>da definire</strong></div>
-      <div class="total"><span>Totale prodotti</span><strong id="total">€0,00</strong></div>
-      <button id="checkoutBtn" class="primary wide">Procedi all’ordine</button>
-    </div>
-  </aside>
-
-  <div id="checkoutModal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="drawer-head"><div><span class="eyebrow">CHECKOUT</span><h2>Completa l’ordine</h2></div><button id="closeCheckout" class="icon-btn">✕</button></div>
-      <form id="checkoutForm">
-        <div class="field-grid">
-          <label>Nome e cognome<input name="name" required autocomplete="name"></label>
-          <label>Telefono<input name="phone" required autocomplete="tel"></label>
-        </div>
-        <label>Email<input name="email" type="email" required autocomplete="email"></label>
-        <label>Indirizzo<input name="address" required autocomplete="street-address"></label>
-        <div class="field-grid">
-          <label>Città<input name="city" required autocomplete="address-level2"></label>
-          <label>CAP<input name="zip" required inputmode="numeric" autocomplete="postal-code"></label>
-        </div>
-        <label>Note ordine<textarea name="notes" rows="3" placeholder="Citofono, preferenze, note..."></textarea></label>
-        <div class="notice">Questa prima versione invia i dati dell’ordine al bot Telegram quando la Mini App è aperta da Telegram. Il pagamento online verrà collegato nel passaggio successivo.</div>
-        <button class="primary wide" type="submit">Conferma ordine</button>
-      </form>
-      <div id="orderSuccess" class="success hidden">
-        <div class="success-icon">✓</div>
-        <h2>Ordine preparato</h2>
-        <p id="successText"></p>
-        <button id="doneBtn" class="primary wide">Chiudi</button>
-      </div>
-    </div>
   </div>
 
   <script src="app.js"></script>

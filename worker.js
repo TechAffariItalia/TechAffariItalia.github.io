@@ -7,6 +7,8 @@ const DEFAULT_PRODUCTS = [
     title:"GUHUAVMI 2026 Smartwatch Sport",
     category:"Wearable",
     image:"assets/temu_smartwatch_guhuavmi.jpg",
+    autoImage:"assets/temu_smartwatch_guhuavmi.jpg",
+    imageFit:"contain",
     description:"Smartwatch da uomo per sport e attività all’aperto. Prezzo, disponibilità e condizioni sono aggiornati direttamente su Temu.",
     affiliateUrl:"https://share.temu.com/aNZyP0gZu8B",
     active:true,
@@ -17,6 +19,8 @@ const DEFAULT_PRODUCTS = [
     title:"Videocamera digitale 66MP orientabile",
     category:"Fotocamere",
     image:"assets/temu_videocamera_66mp.jpg",
+    autoImage:"assets/temu_videocamera_66mp.jpg",
+    imageFit:"contain",
     description:"Videocamera compatta mostrata nella scheda Temu con indicazione 66MP e testa orientabile. Dettagli, prezzo e disponibilità vanno verificati direttamente su Temu.",
     affiliateUrl:"https://share.temu.com/yei2WWdVubB",
     active:true,
@@ -60,6 +64,8 @@ export default {
           title:clean(imported.title || "Prodotto Temu",160),
           category:guessCategory(imported.title || ""),
           image:clean(imported.image || "",1500),
+          autoImage:clean(imported.image || "",1500),
+          imageFit:"contain",
           description:clean(imported.description || "Prezzo, disponibilità e condizioni sono aggiornati direttamente su Temu.",500),
           affiliateUrl:link,
           sourceUrl:imported.finalUrl || "",
@@ -89,6 +95,8 @@ export default {
           title:clean(body.title,160) || products[i].title,
           category:clean(body.category,80) || "Altro",
           image:clean(body.image,2000),
+          autoImage:clean(body.autoImage || products[i].autoImage || products[i].image,2000),
+          imageFit:body.imageFit==="cover" ? "cover" : "contain",
           description:clean(body.description,500),
           affiliateUrl:isTemuUrl(body.affiliateUrl) ? body.affiliateUrl : products[i].affiliateUrl,
           active:body.active !== false,
@@ -128,7 +136,12 @@ function corsHeaders(request){
 
 async function loadProducts(env){
   const saved=await env.CATALOG.get(STORE_KEY,{type:"json"});
-  return Array.isArray(saved)?saved:[...DEFAULT_PRODUCTS];
+  const base=Array.isArray(saved)?saved:[...DEFAULT_PRODUCTS];
+  return base.map(p=>({
+    ...p,
+    autoImage:p.autoImage || p.image || "",
+    imageFit:p.imageFit==="cover" ? "cover" : "contain"
+  }));
 }
 async function saveProducts(env,products){
   await env.CATALOG.put(STORE_KEY,JSON.stringify(products));

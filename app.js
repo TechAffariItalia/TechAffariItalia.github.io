@@ -57,8 +57,8 @@ function renderProducts(){
   grid.innerHTML = list.length ? list.map(p=>`
     <article class="product-card">
       <div class="product-media">
-        <img src="${escapeAttr(p.image || "assets/logo.png")}" alt="${escapeAttr(p.title || "Prodotto")}">
-        <span class="badge">TEMU AFFILIATE</span>
+        <img src="${escapeAttr(p.image || "assets/logo.png")}" alt="${escapeAttr(p.title || "Prodotto")}" style="object-fit:${p.imageFit === "cover" ? "cover" : "contain"}" onerror="this.onerror=null;this.src='assets/logo.png';this.style.objectFit='contain'">
+        <span class="badge">TEMU AFFILIATE</span><span class="product-image-note">immagine prodotto</span>
       </div>
       <div class="product-body">
         <small>${escapeHtml(p.category || "Altro")}</small>

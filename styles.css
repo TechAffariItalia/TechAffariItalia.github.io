@@ -25,7 +25,23 @@ h1{font-size:clamp(32px,7vw,56px);line-height:1.02;margin:8px 0 12px;letter-spac
 .chips{display:flex;gap:8px;padding:0 14px 18px;overflow:auto;scrollbar-width:none}.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;color:#344054;border-radius:999px;padding:9px 13px;font-weight:700}.chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
 .catalog-section{padding:0 14px 20px}.section-title{display:flex;align-items:end;justify-content:space-between;margin-bottom:12px}
 .product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-card{background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 4px 14px rgba(9,30,66,.045)}
-.product-media{aspect-ratio:1/1;background:#fff;position:relative;overflow:hidden}.product-media img{width:100%;height:100%;object-fit:cover}
+.product-media{
+  aspect-ratio:1.18/1;
+  background:linear-gradient(180deg,#ffffff,#f7f8fb);
+  position:relative;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px
+}
+.product-media img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  border-radius:12px
+}
 .badge{position:absolute;left:10px;top:10px;background:#fff;color:#d92d20;font-weight:900;font-size:11px;padding:6px 8px;border-radius:999px;box-shadow:0 3px 8px rgba(0,0,0,.08)}
 .product-body{padding:14px}.product-body small{color:var(--muted)}.product-body h3{font-size:17px;line-height:1.22;margin:5px 0 8px}
 .product-desc{color:#667085;font-size:13px;line-height:1.45;margin:0}.price-note{font-size:13px;font-weight:900;color:#344054;margin-top:10px}
@@ -44,4 +60,40 @@ footer{padding:18px 16px 45px;text-align:center;color:var(--muted)}footer img{wi
   .compact-trust>div{padding:7px 9px;border-bottom:1px solid #f0f2f5}
   .compact-trust>div:last-child{border-bottom:0}
   .compact-trust small{font-size:11px}
+}
+
+
+/* v4 — immagini prodotto: niente tagli indesiderati */
+.product-media{
+  background:linear-gradient(180deg,#fff,#f7f8fb);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+  min-height:230px;
+}
+.product-media img{
+  width:100%;
+  height:100%;
+  max-height:360px;
+  object-fit:contain;
+  object-position:center;
+  border-radius:12px;
+}
+.product-image-note{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  background:rgba(255,255,255,.92);
+  color:#667085;
+  border:1px solid #e7eaf0;
+  border-radius:999px;
+  padding:5px 7px;
+  font-size:9px;
+  font-weight:800;
+  backdrop-filter:blur(6px);
+}
+@media(max-width:560px){
+  .product-media{min-height:270px;max-height:420px}
+  .product-media img{max-height:390px}
 }

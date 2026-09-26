@@ -1,52 +1,49 @@
-TECH AFFARI ITALIA — ADMIN v3
+TECH AFFARI ITALIA — ADMIN v4
 
-OBIETTIVO
-- Sistemare la parte finale del negozio con un blocco informativo compatto.
-- Non modificare più app.js a mano per ogni prodotto.
-- Aggiungere prodotti da una pagina Admin incollando il link affiliato Temu.
-- Catalogo salvato su Cloudflare KV e letto automaticamente dalla WebApp.
+NOVITÀ v4
+- Le immagini nel negozio vengono mostrate INTERE per impostazione predefinita (object-fit: contain).
+- Niente più zoom/tagli automatici delle foto prodotto.
+- Nell'Admin ogni prodotto ha:
+  • anteprima immagine
+  • URL immagine visualizzata modificabile
+  • pulsante Anteprima
+  • pulsante Ripristina immagine automatica
+  • scelta “Mostra intera” / “Riempi il riquadro”
+- Il Worker conserva sia l'immagine automatica recuperata da Temu sia l'eventuale immagine personalizzata.
+- I prodotti già presenti nel KV vengono compatibilizzati automaticamente: non devi ricrearli.
 
-FILE GITHUB
-Sostituisci nella root:
+AGGIORNAMENTO GITHUB
+Sostituisci:
 - index.html
 - styles.css
 - app.js
 
-Aggiungi la cartella:
+Sostituisci nella cartella admin:
 - admin/index.html
 - admin/admin.css
 - admin/admin.js
 
-La cartella assets già esistente resta invariata.
+Non cancellare la cartella assets.
 
-CLOUDFLARE
-1) Crea un namespace KV, ad esempio: tech-affari-catalog
-2) Nel Worker tech-affari-italia-api aggiungi un binding KV:
-   Nome binding: CATALOG
-   Namespace: tech-affari-catalog
-
-3) In Settings > Runtime variables and secrets aggiungi un nuovo Secret:
-   ADMIN_KEY
-   Valore: scegli una password lunga e casuale, almeno 20 caratteri.
-   NON inserire questa chiave nei file GitHub.
-
-4) Sostituisci il codice del Worker con worker.js e fai Deploy.
-
-5) Quando hai verificato che il nuovo sistema funziona, puoi eliminare i vecchi Secrets:
-   BOT_TOKEN
-   ADMIN_CHAT_ID
-   perché il modello affiliato non riceve più ordini via bot.
+AGGIORNAMENTO CLOUDFLARE
+- Sostituisci il codice del Worker con worker.js
+- Mantieni il binding KV:
+  CATALOG → tech-affari-catalog
+- Mantieni il Secret ADMIN_KEY
+- Fai Deploy
 
 AREA ADMIN
 https://techaffariitalia.github.io/admin/
 
-USO
-- Inserisci ADMIN_KEY
-- Incolla il link affiliato Temu
-- Premi "Importa automaticamente"
-- Il Worker prova a recuperare titolo, immagine e descrizione dalla pagina Temu
-- Il prodotto compare subito nel catalogo pubblico
-- Dall'Admin puoi correggere titolo, categoria, descrizione, immagine, link, visibilità o eliminare il prodotto
+COME CAMBIARE UNA FOTO
+1. Apri l'Admin.
+2. Inserisci ADMIN_KEY.
+3. Trova il prodotto.
+4. Nel campo “URL immagine visualizzata” incolla l'URL della foto desiderata.
+5. Premi “Anteprima”.
+6. Lascia “Mostra intera (consigliato)” per evitare tagli.
+7. Premi “Salva”.
+8. Il negozio si aggiorna automaticamente.
 
-NOTA
-Temu può cambiare il modo in cui espone i metadati. Se un'importazione non recupera titolo o immagine, il prodotto viene comunque creato e puoi correggerlo direttamente dall'Admin senza modificare codice.
+Se vuoi tornare alla foto recuperata durante l'importazione, premi:
+“Ripristina immagine automatica” → “Salva”.

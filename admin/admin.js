@@ -32,17 +32,59 @@ async function loadCatalog(){
 function renderCatalog(products){
   $("#catalog").innerHTML = products.length ? products.map(p=>`
     <article class="item" data-id="${escapeAttr(p.id)}">
-      <img src="${escapeAttr(p.image || "../assets/logo.png")}" alt="">
+      <div class="image-preview">
+        <img class="preview-img"
+             src="${escapeAttr(p.image || "../assets/logo.png")}"
+             alt=""
+             style="object-fit:${p.imageFit==="cover"?"cover":"contain"}"
+             onerror="this.onerror=null;this.src='../assets/logo.png';this.style.objectFit='contain'">
+      </div>
       <div>
         <div class="fields">
           <label>Titolo<input data-field="title" value="${escapeAttr(p.title||"")}"></label>
           <label>Categoria<input data-field="category" value="${escapeAttr(p.category||"Altro")}"></label>
-          <label class="full">Descrizione<textarea data-field="description">${escapeHtml(p.description||"")}</textarea></label>
-          <label class="full">Immagine URL<input data-field="image" value="${escapeAttr(p.image||"")}"></label>
-          <label class="full">Link affiliato<input data-field="affiliateUrl" value="${escapeAttr(p.affiliateUrl||"")}"></label>
+
+          <label class="full">Descrizione
+            <textarea data-field="description">${escapeHtml(p.description||"")}</textarea>
+          </label>
+
+          <div class="full image-tools">
+            <div></div>
+            <div class="image-controls">
+              <label>URL immagine visualizzata
+                <input data-field="image" class="image-url" value="${escapeAttr(p.image||"")}" placeholder="https://...">
+              </label>
+
+              <label>Visualizzazione immagine
+                <select data-field="imageFit" class="image-fit">
+                  <option value="contain" ${p.imageFit!=="cover"?"selected":""}>Mostra intera (consigliato)</option>
+                  <option value="cover" ${p.imageFit==="cover"?"selected":""}>Riempi il riquadro</option>
+                </select>
+              </label>
+
+              <div class="mini-actions">
+                <button type="button" class="secondary preview-image">Anteprima</button>
+                <button type="button" class="secondary reset-image" ${p.autoImage?"":"disabled"}>Ripristina immagine automatica</button>
+              </div>
+
+              <div class="hint">
+                Se l'immagine recuperata da Temu contiene scritte o viene male, incolla qui l'URL di una foto prodotto più pulita.
+                Il negozio usa di default “Mostra intera”, quindi l'immagine non viene tagliata.
+              </div>
+
+              <input type="hidden" data-field="autoImage" value="${escapeAttr(p.autoImage||p.image||"")}">
+            </div>
+          </div>
+
+          <label class="full">Link affiliato
+            <input data-field="affiliateUrl" value="${escapeAttr(p.affiliateUrl||"")}">
+          </label>
         </div>
+
         <div class="actions">
-          <label class="active-row"><input type="checkbox" data-field="active" ${p.active!==false?"checked":""}> Visibile</label>
+          <label class="active-row">
+            <input type="checkbox" data-field="active" ${p.active!==false?"checked":""}> Visibile
+          </label>
           <button class="secondary save">Salva</button>
           <button class="danger delete">Elimina</button>
           <a class="secondary" href="${escapeAttr(p.affiliateUrl||"#")}" target="_blank" rel="noopener" style="text-decoration:none">Apri Temu</a>
@@ -52,6 +94,36 @@ function renderCatalog(products){
 
   document.querySelectorAll(".save").forEach(b=>b.addEventListener("click",()=>saveItem(b.closest(".item"))));
   document.querySelectorAll(".delete").forEach(b=>b.addEventListener("click",()=>deleteItem(b.closest(".item"))));
+
+  document.querySelectorAll(".preview-image").forEach(b=>b.addEventListener("click",()=>{
+    const item=b.closest(".item");
+    updateImagePreview(item);
+  }));
+
+  document.querySelectorAll(".reset-image").forEach(b=>b.addEventListener("click",()=>{
+    const item=b.closest(".item");
+    const auto=item.querySelector('[data-field="autoImage"]')?.value || "";
+    if(!auto) return;
+    item.querySelector('[data-field="image"]').value=auto;
+    updateImagePreview(item);
+  }));
+
+  document.querySelectorAll(".image-fit").forEach(sel=>sel.addEventListener("change",()=>{
+    updateImagePreview(sel.closest(".item"));
+  }));
+}
+
+function updateImagePreview(item){
+  const img=item.querySelector(".preview-img");
+  const url=item.querySelector('[data-field="image"]')?.value.trim() || "../assets/logo.png";
+  const fit=item.querySelector('[data-field="imageFit"]')?.value || "contain";
+  img.onerror=()=>{
+    img.onerror=null;
+    img.src="../assets/logo.png";
+    img.style.objectFit="contain";
+  };
+  img.style.objectFit=fit;
+  img.src=url;
 }
 
 async function saveItem(el){
@@ -93,7 +165,7 @@ $("#importBtn").addEventListener("click",async()=>{
       method:"POST",headers:authHeaders(),body:JSON.stringify({link})
     });
     status.className="status ok";
-    status.textContent=data.warning?`Importato. ${data.warning}`:"Prodotto importato e pubblicato.";
+    status.textContent=data.warning?`Importato. ${data.warning}`:"Prodotto importato e pubblicato. Puoi controllare o sostituire l’immagine qui sotto.";
     $("#temuLink").value="";
     loadCatalog();
   }catch(e){

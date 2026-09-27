@@ -54,8 +54,68 @@ const API_BASE = "https://tech-affari-italia-api.marconeri70.workers.dev";
 const $ = s => document.querySelector(s);
 
 const keyInput = $("#adminKey");
-keyInput.value = sessionStorage.getItem("tai_admin_key") || "";
-keyInput.addEventListener("input",()=>sessionStorage.setItem("tai_admin_key",keyInput.value));
+const rememberKey = $("#rememberAdminKey");
+const forgetKeyBtn = $("#forgetAdminKey");
+const keyStorageInfo = $("#keyStorageInfo");
+
+const PERSISTENT_KEY = "tai_admin_key_persistent";
+const REMEMBER_PREF = "tai_admin_key_remember";
+
+// Default: remember on this installed/private device unless the user disabled it before.
+const rememberedPref = localStorage.getItem(REMEMBER_PREF);
+rememberKey.checked = rememberedPref !== "0";
+
+// Load a persistent key first, then fall back to the current-session copy.
+const persistentKey = localStorage.getItem(PERSISTENT_KEY) || "";
+const sessionKey = sessionStorage.getItem("tai_admin_key") || "";
+keyInput.value = persistentKey || sessionKey;
+
+function saveAdminKeyPreference(){
+  const value = keyInput.value.trim();
+
+  // Always keep it for the current open session.
+  if (value) sessionStorage.setItem("tai_admin_key", value);
+  else sessionStorage.removeItem("tai_admin_key");
+
+  if (rememberKey.checked && value) {
+    localStorage.setItem(PERSISTENT_KEY, value);
+    localStorage.setItem(REMEMBER_PREF, "1");
+    if (keyStorageInfo) {
+      keyStorageInfo.textContent = "Chiave memorizzata su questo dispositivo. Resterà disponibile anche dopo aver chiuso l’app.";
+    }
+  } else {
+    localStorage.removeItem(PERSISTENT_KEY);
+    localStorage.setItem(REMEMBER_PREF, "0");
+    if (keyStorageInfo) {
+      keyStorageInfo.textContent = "La chiave resterà disponibile solo finché questa sessione dell’app rimane attiva.";
+    }
+  }
+}
+
+keyInput.addEventListener("input", saveAdminKeyPreference);
+keyInput.addEventListener("change", saveAdminKeyPreference);
+
+rememberKey.addEventListener("change", saveAdminKeyPreference);
+
+forgetKeyBtn.addEventListener("click", () => {
+  localStorage.removeItem(PERSISTENT_KEY);
+  sessionStorage.removeItem("tai_admin_key");
+  localStorage.setItem(REMEMBER_PREF, "0");
+  keyInput.value = "";
+  rememberKey.checked = false;
+  if (keyStorageInfo) {
+    keyStorageInfo.textContent = "Chiave dimenticata da questo dispositivo.";
+  }
+});
+
+// Keep the explanatory text consistent on first load.
+if (persistentKey) {
+  if (keyStorageInfo) {
+    keyStorageInfo.textContent = "Chiave già memorizzata su questo dispositivo. Non dovrai reinserirla a ogni apertura.";
+  }
+} else {
+  saveAdminKeyPreference();
+}
 
 function authHeaders(json=true){
   const h = {"Authorization":`Bearer ${keyInput.value.trim()}`};

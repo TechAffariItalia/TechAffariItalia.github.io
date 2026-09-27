@@ -33,9 +33,18 @@
 
     <section class="panel">
       <label>Chiave amministratore
-        <input id="adminKey" type="password" autocomplete="off" placeholder="ADMIN_KEY">
+        <input id="adminKey" type="password" autocomplete="current-password" placeholder="ADMIN_KEY">
       </label>
-      <small>La chiave non viene salvata nel sito pubblico. Puoi tenerla solo per questa sessione.</small>
+
+      <label class="remember-row">
+        <input id="rememberAdminKey" type="checkbox" checked>
+        <span>Ricorda la chiave su questo dispositivo</span>
+      </label>
+
+      <div class="key-actions">
+        <small id="keyStorageInfo">Se selezionato, l'app conserverà la chiave su questo telefono così non dovrai reinserirla ogni volta.</small>
+        <button id="forgetAdminKey" class="secondary small-btn" type="button">Dimentica chiave</button>
+      </div>
     </section>
 
     <section class="panel import">

@@ -1,4 +1,4 @@
-const CACHE = "tai-admin-v1";
+const CACHE = "tai-admin-v2";
 const SHELL = [
   "./",
   "./index.html",
@@ -47,7 +47,21 @@ self.addEventListener("fetch", event => {
     return;
   }
 
-  // Cache-first for local static assets.
+  // Network-first for JS/CSS/manifest so Admin updates arrive immediately.
+  if (/\.(js|css|webmanifest)$/.test(url.pathname)) {
+    event.respondWith(
+      fetch(req)
+        .then(res => {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Cache-first for icons and other local static assets.
   event.respondWith(
     caches.match(req).then(cached => cached || fetch(req).then(res => {
       const copy = res.clone();

@@ -51,6 +51,58 @@ if (standalone && installHelp) {
 }
 
 const API_BASE = "https://tech-affari-italia-api.marconeri70.workers.dev";
+let categories = [];
+
+async function loadCategories(){
+  try{
+    const data = await api("/categories",{cache:"no-store"});
+    categories = Array.isArray(data.categories) ? data.categories : [];
+    renderCategoryList();
+  }catch(e){ console.warn(e); }
+}
+
+function renderCategoryList(){
+  const box=$("#categoryList");
+  if(!box) return;
+  box.innerHTML = categories.length
+    ? categories.map(c=>`<span class="category-pill">${escapeHtml(c)}<button type="button" data-delete-category="${escapeAttr(c)}">×</button></span>`).join("")
+    : '<span class="muted">Nessuna categoria.</span>';
+
+  document.querySelectorAll("[data-delete-category]").forEach(btn=>{
+    btn.addEventListener("click",()=>deleteCategory(btn.dataset.deleteCategory));
+  });
+}
+
+async function addCategory(){
+  const input=$("#newCategoryName");
+  const name=(input?.value||"").trim();
+  if(!name) return;
+  if(!keyInput.value.trim()) return alert("Inserisci la chiave amministratore.");
+  try{
+    const data=await api("/admin/categories",{method:"POST",headers:authHeaders(),body:JSON.stringify({name})});
+    categories=data.categories||[];
+    input.value="";
+    renderCategoryList();
+    loadCatalog();
+  }catch(e){ alert(e.message); }
+}
+
+async function deleteCategory(name){
+  if(!keyInput.value.trim()) return alert("Inserisci la chiave amministratore.");
+  if(!confirm(`Eliminare la categoria "${name}"?`)) return;
+  try{
+    const data=await api(`/admin/categories/${encodeURIComponent(name)}`,{method:"DELETE",headers:authHeaders(false)});
+    categories=data.categories||[];
+    renderCategoryList();
+    loadCatalog();
+  }catch(e){ alert(e.message); }
+}
+
+function categoryOptions(selected){
+  const list=[...new Set(["Altro",...categories,selected].filter(Boolean))];
+  return list.map(c=>`<option value="${escapeAttr(c)}" ${c===selected?"selected":""}>${escapeHtml(c)}</option>`).join("");
+}
+
 const $ = s => document.querySelector(s);
 
 const keyInput = $("#adminKey");
@@ -154,7 +206,7 @@ function renderCatalog(products){
       <div>
         <div class="fields">
           <label>Titolo<input data-field="title" value="${escapeAttr(p.title||"")}"></label>
-          <label>Categoria<input data-field="category" value="${escapeAttr(p.category||"Altro")}"></label>
+          <label>Categoria<select data-field="category">${categoryOptions(p.category||"Altro")}</select></label>
 
           <label class="full">Descrizione
             <textarea data-field="description">${escapeHtml(p.description||"")}</textarea>
@@ -290,4 +342,6 @@ $("#refreshBtn").addEventListener("click",loadCatalog);
 function escapeHtml(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
 function escapeAttr(v){return escapeHtml(v).replaceAll('"',"&quot;")}
 
-loadCatalog();
+$("#addCategoryBtn")?.addEventListener("click",addCategory);
+$("#newCategoryName")?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();addCategory();}});
+Promise.all([loadCategories(),loadCatalog()]);

@@ -25,6 +25,7 @@ const fallbackProducts = [
 ];
 
 let products = [];
+let categories = [];
 let activeCat = "Tutti";
 let query = "";
 
@@ -37,7 +38,8 @@ function openAffiliate(url){
 }
 
 function renderCategories(){
-  const cats = ["Tutti", ...new Set(products.filter(p=>p.active!==false).map(p=>p.category || "Altro"))];
+  const productCats = products.filter(p=>p.active!==false).map(p=>p.category || "Altro");
+  const cats = ["Tutti", ...new Set([...(categories||[]), ...productCats].filter(Boolean))];
   $("#categoryChips").innerHTML = cats.map((cat,i)=>`<button class="chip ${i===0?"active":""}" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`).join("");
   document.querySelectorAll(".chip").forEach(btn=>btn.addEventListener("click",()=>{
     document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
@@ -76,13 +78,21 @@ function renderProducts(){
 async function loadProducts(){
   grid.innerHTML = `<div class="loading">Caricamento catalogo…</div>`;
   try{
-    const r = await fetch(`${API_BASE}/products`, {cache:"no-store"});
-    if(!r.ok) throw new Error("API non disponibile");
-    const data = await r.json();
-    products = Array.isArray(data.products) && data.products.length ? data.products : fallbackProducts;
+    const [pr,cr] = await Promise.all([
+      fetch(`${API_BASE}/products`,{cache:"no-store"}),
+      fetch(`${API_BASE}/categories`,{cache:"no-store"})
+    ]);
+    if(!pr.ok) throw new Error("API prodotti non disponibile");
+    const pdata=await pr.json();
+    products=Array.isArray(pdata.products)&&pdata.products.length ? pdata.products : fallbackProducts;
+    if(cr.ok){
+      const cdata=await cr.json();
+      categories=Array.isArray(cdata.categories)?cdata.categories:[];
+    }
   }catch(e){
     console.warn(e);
-    products = fallbackProducts;
+    products=fallbackProducts;
+    categories=[];
   }
   renderCategories();
   renderProducts();
